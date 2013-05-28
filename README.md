@@ -7,6 +7,29 @@ impressionist
 
 A lightweight plugin that logs impressions per action or manually per model
 
+
+Changes made on thie fork
+=============
+
+1. took away attr\_accessible to make it runnable on rails4
+2. added user\_scope option to enable other user scope instead of only current\_user
+
+        # admins_controller.rb
+        impressionist user_scope: :current_admin
+
+3. added user\_type to impression model to maintain the polymorphic user relationship
+
+        # impression.rb
+        self.user_id #   1
+        self.user_type # Admin
+        self.user #  <Admin id: 1, ... >
+
+Note:
+
+* I didn't add tests for these change.
+* I didn't make the changes for MongoDB, only updated the ActiveRecord stuff
+
+
 --------------------------------------------------------------------------------
 
 What does this thing do?

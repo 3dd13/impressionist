@@ -8,7 +8,7 @@ impressionist
 A lightweight plugin that logs impressions per action or manually per model
 
 
-Changes made on thie fork
+Changes made on the fork
 =============
 
 1. took away attr\_accessible to make it runnable on rails4

@@ -3,7 +3,7 @@ require 'digest/sha2'
 module ImpressionistController
   module ClassMethods
     def impressionist(opts={})
-      before_filter { |c| c.impressionist_subapp_filter(opts[:actions], opts[:unique])}
+      before_filter { |c| c.impressionist_subapp_filter(opts[:actions], opts[:unique], opts[:user_scope])}
     end
   end
 
@@ -29,8 +29,9 @@ module ImpressionistController
       @impressionist_hash = Digest::SHA2.hexdigest(Time.now.to_f.to_s+rand(10000).to_s)
     end
 
-    def impressionist_subapp_filter(actions=nil,unique_opts=nil)
+    def impressionist_subapp_filter(actions=nil,unique_opts=nil,user_scope=:current_user)
       unless bypass
+        @user_scope = user_scope
         actions.collect!{|a|a.to_s} unless actions.blank?
         if (actions.blank? || actions.include?(action_name)) && unique?(unique_opts)
           Impression.create(direct_create_statement)
@@ -68,6 +69,7 @@ module ImpressionistController
         :controller_name => controller_name,
         :action_name => action_name,
         :user_id => user_id,
+        :user_type => user_type,
         :request_hash => @impressionist_hash,
         :session_hash => session_hash,
         :ip_address => request.remote_ip,
@@ -93,11 +95,19 @@ module ImpressionistController
       request.session_options[:id]
     end
 
+    def user
+      @user ||= instance_variable_get("@#{@user_scope}") || send(@user_scope)
+    end
+
     #use both @current_user and current_user helper
     def user_id
-      user_id = @current_user ? @current_user.id : nil rescue nil
-      user_id = current_user ? current_user.id : nil rescue nil if user_id.blank?
+      user_id = user ? user.id : nil rescue nil
       user_id
+    end
+    
+    def user_type
+      user_type = user ? user.class.to_s : nil rescue nil
+      user_type
     end
   end
 end
